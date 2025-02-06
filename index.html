@@ -13,15 +13,39 @@
         canvas {
             display: block;
         }
+        .joystick-container {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 16vw;
+            height: 16vw;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .joystick {
+            width: 25%;
+            height: 25%;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.7);
+            position: absolute;
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
+    <div class="joystick-container">
+        <div class="joystick" id="joystick"></div>
+    </div>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const gridSize = 50; // Increase grid size
+        const speedMultiplier = 0.5; // Speed multiplier (adjustable)
+
+        const gridSize = 50; // Grid size
         let player = {
             x: 250,
             y: 250,
@@ -41,6 +65,16 @@
             d: false
         };
 
+        const joystickPad = document.querySelector('.joystick-container');
+        const joystick = document.getElementById('joystick');
+
+        let joystickCenter = { x: joystickPad.offsetWidth / 2, y: joystickPad.offsetHeight / 2 };
+        let joystickRadius = joystickPad.offsetWidth / 2;
+        let joystickMovement = { x: 0, y: 0 };
+        let isTouchingJoystick = false;
+
+        let touchStart = { x: 0, y: 0 };
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'w') keys.w = true;
             if (e.key === 'a') keys.a = true;
@@ -55,11 +89,43 @@
             if (e.key === 'd') keys.d = false;
         });
 
+        joystickPad.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = joystickPad.getBoundingClientRect();
+            touchStart = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+            isTouchingJoystick = true;
+        });
+
+        joystickPad.addEventListener('touchmove', (e) => {
+            if (isTouchingJoystick) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const rect = joystickPad.getBoundingClientRect();
+                const touchPosition = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+
+                const dx = touchPosition.x - joystickCenter.x;
+                const dy = touchPosition.y - joystickCenter.y;
+                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), joystickRadius);
+
+                joystickMovement.x = distance * (dx / Math.sqrt(dx * dx + dy * dy));
+                joystickMovement.y = distance * (dy / Math.sqrt(dx * dx + dy * dy));
+
+                joystick.style.transform = `translate(${joystickMovement.x - joystick.offsetWidth / 2}px, ${joystickMovement.y - joystick.offsetHeight / 2}px)`;
+            }
+        });
+
+        joystickPad.addEventListener('touchend', () => {
+            isTouchingJoystick = false;
+            joystickMovement = { x: 0, y: 0 };
+            joystick.style.transform = 'translate(0px, 0px)';
+        });
+
         function movePlayer() {
-            if (keys.w) player.y -= player.speed;
-            if (keys.a) player.x -= player.speed;
-            if (keys.s) player.y += player.speed;
-            if (keys.d) player.x += player.speed;
+            const movementMultiplier = Math.sqrt(joystickMovement.x * joystickMovement.x + joystickMovement.y * joystickMovement.y) / joystickRadius;
+
+            player.x += joystickMovement.x * speedMultiplier * movementMultiplier;
+            player.y += joystickMovement.y * speedMultiplier * movementMultiplier;
 
             // Update camera to follow player
             camera.x = player.x - canvas.width / 2;
