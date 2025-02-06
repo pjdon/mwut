@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,9 +11,11 @@
             padding: 0;
             overflow: hidden;
         }
+
         canvas {
             display: block;
         }
+
         .joystick-container {
             position: absolute;
             bottom: 30px;
@@ -25,6 +28,7 @@
             justify-content: center;
             align-items: center;
         }
+
         .joystick {
             width: 25%;
             height: 25%;
@@ -34,12 +38,17 @@
         }
     </style>
 </head>
+
 <body>
     <canvas id="gameCanvas"></canvas>
     <div class="joystick-container">
         <div class="joystick" id="joystick"></div>
     </div>
     <script>
+        /mobile/i.test(navigator.userAgent) && !location.hash && setTimeout(function () {
+            window.scrollTo(0, 1);
+        }, 1000);
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -114,7 +123,7 @@
 
                 const dx = touchPosition.x - joystickCenter.x;
                 const dy = touchPosition.y - joystickCenter.y;
-                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), joystickRadius*0.6);
+                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), joystickRadius * 0.6);
 
                 joystickMovement.x = distance * (dx / Math.sqrt(dx * dx + dy * dy));
                 joystickMovement.y = distance * (dy / Math.sqrt(dx * dx + dy * dy));
@@ -187,4 +196,5 @@
         gameLoop();
     </script>
 </body>
+
 </html>
