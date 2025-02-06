@@ -114,7 +114,7 @@
 
                 const dx = touchPosition.x - joystickCenter.x;
                 const dy = touchPosition.y - joystickCenter.y;
-                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), joystickRadius);
+                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), joystickRadius*0.6);
 
                 joystickMovement.x = distance * (dx / Math.sqrt(dx * dx + dy * dy));
                 joystickMovement.y = distance * (dy / Math.sqrt(dx * dx + dy * dy));
