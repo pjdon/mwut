@@ -43,7 +43,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        const speedMultiplier = 0.5; // Speed multiplier (adjustable)
+        const speedMultiplier = 0.1; // Reduced speed multiplier by a factor of 5
 
         const gridSize = 50; // Grid size
         let player = {
@@ -95,6 +95,14 @@
             const rect = joystickPad.getBoundingClientRect();
             touchStart = { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
             isTouchingJoystick = true;
+
+            // Position joystick at the touch point
+            const dx = touchStart.x - joystickCenter.x;
+            const dy = touchStart.y - joystickCenter.y;
+            joystickMovement.x = Math.min(Math.max(dx, -joystickRadius), joystickRadius);
+            joystickMovement.y = Math.min(Math.max(dy, -joystickRadius), joystickRadius);
+            joystick.style.left = `${joystickCenter.x + joystickMovement.x - joystick.offsetWidth / 2}px`;
+            joystick.style.top = `${joystickCenter.y + joystickMovement.y - joystick.offsetHeight / 2}px`;
         });
 
         joystickPad.addEventListener('touchmove', (e) => {
@@ -111,14 +119,16 @@
                 joystickMovement.x = distance * (dx / Math.sqrt(dx * dx + dy * dy));
                 joystickMovement.y = distance * (dy / Math.sqrt(dx * dx + dy * dy));
 
-                joystick.style.transform = `translate(${joystickMovement.x - joystick.offsetWidth / 2}px, ${joystickMovement.y - joystick.offsetHeight / 2}px)`;
+                joystick.style.left = `${joystickCenter.x + joystickMovement.x - joystick.offsetWidth / 2}px`;
+                joystick.style.top = `${joystickCenter.y + joystickMovement.y - joystick.offsetHeight / 2}px`;
             }
         });
 
         joystickPad.addEventListener('touchend', () => {
             isTouchingJoystick = false;
             joystickMovement = { x: 0, y: 0 };
-            joystick.style.transform = 'translate(0px, 0px)';
+            joystick.style.left = `${joystickCenter.x - joystick.offsetWidth / 2}px`;
+            joystick.style.top = `${joystickCenter.y - joystick.offsetHeight / 2}px`;
         });
 
         function movePlayer() {
