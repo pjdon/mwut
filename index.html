@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top-Down Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const gridSize = 50; // Increase grid size
+        let player = {
+            x: 250,
+            y: 250,
+            radius: 10,
+            speed: 5
+        };
+
+        let camera = {
+            x: player.x - canvas.width / 2,
+            y: player.y - canvas.height / 2
+        };
+
+        const keys = {
+            w: false,
+            a: false,
+            s: false,
+            d: false
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'w') keys.w = true;
+            if (e.key === 'a') keys.a = true;
+            if (e.key === 's') keys.s = true;
+            if (e.key === 'd') keys.d = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'w') keys.w = false;
+            if (e.key === 'a') keys.a = false;
+            if (e.key === 's') keys.s = false;
+            if (e.key === 'd') keys.d = false;
+        });
+
+        function movePlayer() {
+            if (keys.w) player.y -= player.speed;
+            if (keys.a) player.x -= player.speed;
+            if (keys.s) player.y += player.speed;
+            if (keys.d) player.x += player.speed;
+
+            // Update camera to follow player
+            camera.x = player.x - canvas.width / 2;
+            camera.y = player.y - canvas.height / 2;
+        }
+
+        function draw() {
+            // Clear canvas and apply camera translation
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+
+            // Draw infinite grid
+            const startX = Math.floor(camera.x / gridSize) * gridSize;
+            const startY = Math.floor(camera.y / gridSize) * gridSize;
+
+            for (let x = startX; x < canvas.width + gridSize; x += gridSize) {
+                for (let y = startY; y < canvas.height + gridSize; y += gridSize) {
+                    ctx.strokeStyle = "#aaa";
+                    ctx.strokeRect(x, y, gridSize, gridSize);
+                }
+            }
+
+            // Draw player
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            movePlayer();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            camera.x = player.x - canvas.width / 2;
+            camera.y = player.y - canvas.height / 2;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        gameLoop();
+    </script>
+</body>
+</html>
